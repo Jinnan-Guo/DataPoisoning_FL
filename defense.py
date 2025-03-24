@@ -13,8 +13,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 # Paths you need to put in.
-MODELS_PATH = "/absolute/path/to/models/folder/1823_models"
-EXP_INFO_PATH = "/absolute/path/to/log/file/1823.log"
+MODELS_PATH = f"{os.getcwd()}/3000_models"
 
 # The epochs over which you are calculating gradients.
 EPOCHS = list(range(10, 200))
@@ -78,7 +77,7 @@ if __name__ == '__main__':
         start_model_file = os.path.join(MODELS_PATH, start_model_file)
         start_model = load_models(args, [start_model_file])[0]
 
-        start_model_layer_param = list(get_layer_parameters(start_model.get_nn_parameters(), LAYER_NAME)[CLASS_NUM])
+        start_model_layer_param = list(get_layer_parameters(start_model.get_nn_parameters_cpu(), LAYER_NAME)[CLASS_NUM])
 
         end_model_files = get_model_files_for_epoch(model_files, epoch)
         end_model_files = get_model_files_for_suffix(end_model_files, args.get_epoch_save_end_suffix())
@@ -88,7 +87,7 @@ if __name__ == '__main__':
             end_model_file = os.path.join(MODELS_PATH, end_model_file)
             end_model = load_models(args, [end_model_file])[0]
 
-            end_model_layer_param = list(get_layer_parameters(end_model.get_nn_parameters(), LAYER_NAME)[CLASS_NUM])
+            end_model_layer_param = list(get_layer_parameters(end_model.get_nn_parameters_cpu(), LAYER_NAME)[CLASS_NUM])
 
             gradient = calculate_parameter_gradients(logger, start_model_layer_param, end_model_layer_param)
             gradient = gradient.flatten()

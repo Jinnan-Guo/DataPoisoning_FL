@@ -100,6 +100,9 @@ class Client:
         """
         return self.net.state_dict()
 
+    def get_nn_parameters_cpu(self):
+        return {k: v.cpu() for k,v in self.net.state_dict().items()}
+
     def update_nn_parameters(self, new_params):
         """
         Update the NN's parameters.
