@@ -15,10 +15,10 @@ from mpl_toolkits.mplot3d import Axes3D
 from sklearn.cluster import KMeans
 
 # Paths you need to put in.
-MODELS_PATH = f"{os.getcwd()}/3000_models"
+MODELS_PATH = f"{os.getcwd()}/3001_models"
 
 # The epochs over which you are calculating gradients.
-EPOCHS = list(range(10, 75))
+EPOCHS = list(range(3, 10))
 
 # The layer of the NNs that you want to investigate.
 #   If you are using the provided Fashion MNIST CNN, this should be "fc.weight"
@@ -30,16 +30,16 @@ CLASS_NUM = 1
 
 # The IDs for the poisoned workers. This needs to be manually filled out.
 # You can find this information at the beginning of an experiment's log file.
-POISONED_WORKER_IDS = [2]
+POISONED_WORKER_IDS = []
 
 # The resulting graph is saved to a file
 SAVE_NAME = "defense_results.jpg"
 SAVE_NAME_CLUSTER = "defense_cluster.jpg"
 SAVE_SIZE = (18, 14)
 
-SIZE_THRESHOLD = 0.05 # outlier should be more than 5% of the gradient update
+SIZE_THRESHOLD = 0.3 # outlier should be <= 30%
 
-DISTANCE_THRESHOLD = 10 # distance should more than 10
+DISTANCE_THRESHOLD = 12 # distance should more than 12
 
 def load_models(args, model_filenames):
     clients = []
@@ -143,7 +143,7 @@ if __name__ == '__main__':
     distance = np.linalg.norm(centroids[0] - centroids[1])
     print(f"Center distance {distance}")
 
-    if outlier_ratio < SIZE_THRESHOLD and distance < DISTANCE_THRESHOLD:
+    if outlier_ratio > SIZE_THRESHOLD or distance < DISTANCE_THRESHOLD:
         print(f"No outlier detected")
     else:
         plot_gradients_with_label(zip(cluster_labels, dim_reduced_gradients), outlier_label)
