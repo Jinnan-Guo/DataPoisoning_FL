@@ -37,6 +37,9 @@ SAVE_NAME = "defense_results.jpg"
 SAVE_NAME_CLUSTER = "defense_cluster.jpg"
 SAVE_SIZE = (18, 14)
 
+SIZE_THRESHOLD = 0.05 # outlier should be more than 5% of the gradient update
+
+DISTANCE_THRESHOLD = 10 # distance should more than 10
 
 def load_models(args, model_filenames):
     clients = []
@@ -126,12 +129,21 @@ if __name__ == '__main__':
 
     logger.info("Dimensionally-reduced gradients shape: ({}, {})".format(len(dim_reduced_gradients), dim_reduced_gradients[0].shape[0]))
 
+    plot_gradients_2d(zip(worker_ids, dim_reduced_gradients))
+
     # clustering
     kmeans = KMeans(2)
     cluster_labels = kmeans.fit_predict(dim_reduced_gradients)
     print(f"cluster labels {cluster_labels}")
     outlier_label = np.argmin(np.bincount(cluster_labels))
 
-    plot_gradients_2d(zip(worker_ids, dim_reduced_gradients))
+    outlier_ratio = np.bincount(cluster_labels)[outlier_label] / np.bincount(cluster_labels).sum()
+    print(f"Outlier ratio {outlier_ratio}")
+    centroids = kmeans.cluster_centers_
+    distance = np.linalg.norm(centroids[0] - centroids[1])
+    print(f"Center distance {distance}")
 
-    plot_gradients_with_label(zip(cluster_labels, dim_reduced_gradients), outlier_label)
+    if outlier_ratio < SIZE_THRESHOLD and distance < DISTANCE_THRESHOLD:
+        print(f"No outlier detected")
+    else:
+        plot_gradients_with_label(zip(cluster_labels, dim_reduced_gradients), outlier_label)
